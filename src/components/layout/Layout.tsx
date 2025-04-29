@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import '../../assets/styles/Layout.scss';
 import { Outlet, useNavigate } from 'react-router-dom';
-import Navbar from '../common/Navbar';
-import Footer from '../common/Footer';
+// import Navbar from '../common/Navbar';
+// import Footer from '../common/Footer';
 import { RoleProvider } from '../../utils/RoleContext';
+// import Cookies from 'js-cookie';
 
 const Layout = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState<string | null>(null);
-
+  // const user_id = Cookies.get('user_id');
   useEffect(() => {
-    const userId = sessionStorage.getItem('userid');
+    const access_token = sessionStorage.getItem('access_token');
     const userRole = sessionStorage.getItem('role');
-    if (!userId) {
+    if (!access_token) {
       navigate('/auth/login');
     } else {
       setRole(userRole);
@@ -26,11 +27,11 @@ const Layout = () => {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <RoleProvider role={role}>
         <Outlet />
       </RoleProvider>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

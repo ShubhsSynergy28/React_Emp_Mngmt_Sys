@@ -1,0 +1,49 @@
+.navbar {
+    width: 100vw;
+    height: 70px;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    // position: fixed;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .navbar-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    background: linear-gradient(90deg, #3498db, #2c3e50);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .logout-button {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  
+    &:hover {
+      background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+  
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  

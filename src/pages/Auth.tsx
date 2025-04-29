@@ -5,7 +5,9 @@ const Auth = () => {
   return (
     // <div>Auth</div>
     <>
+    <div className='auth-container'>
     <Outlet />
+    </div>
     </>
   )
 }

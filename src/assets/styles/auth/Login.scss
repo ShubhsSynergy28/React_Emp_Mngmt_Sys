@@ -1,0 +1,213 @@
+.login-background {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+  .floating-element {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    z-index: 0;
+
+    &.element-1 {
+      height: 200px;
+      width: 200px;
+      top: -50px;
+      left: -50px;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    }
+
+    &.element-2 {
+      height: 300px;
+      width: 300px;
+      bottom: -100px;
+      right: -100px;
+      background: radial-gradient(circle, rgba(200,200,255,0.6) 0%, rgba(200,200,255,0) 70%);
+    }
+
+    &.element-3 {
+      height: 150px;
+      width: 150px;
+      top: 40%;
+      right: 20%;
+      background: radial-gradient(circle, rgba(255,220,220,0.7) 0%, rgba(255,220,220,0) 70%);
+    }
+  }
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  z-index: 1;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  min-height: 500px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 24px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 
+      0 12px 40px rgba(31, 38, 135, 0.15),
+      0 6px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.head-title-for-login {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  background: linear-gradient(90deg, #3498db, #2c3e50);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.5rem;
+  margin: 20px 0;
+
+  .login-form-group {
+    width: 100%;
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #34495e;
+      font-size: 0.95rem;
+    }
+
+    .MuiTextField-root {
+      width: 100%;
+
+      .MuiOutlinedInput-root {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+
+        &:hover .MuiOutlinedInput-notchedOutline {
+          border-color: #3498db;
+        }
+
+        &.Mui-focused .MuiOutlinedInput-notchedOutline {
+          border-color: #2980b9;
+          border-width: 2px;
+        }
+      }
+
+      .MuiInputLabel-root.Mui-focused {
+        color: #2980b9;
+      }
+    }
+  }
+}
+
+.login-button {
+  color: white;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  align-self: center;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  width: 100%;
+  max-width: 200px;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .loading-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+
+    span {
+      display: inline-block;
+      animation: bounce 1.4s infinite ease-in-out both;
+      
+      &:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      
+      &:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+    }
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 20px;
+    width: 95%;
+    min-height: 450px;
+  }
+
+  .head-title-for-login {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .login-form {
+    gap: 1.2rem;
+  }
+}
