@@ -1,0 +1,65 @@
+.employee-details-container {
+    max-width: 800px;
+    margin: 100px auto 80px; // leaving space for navbar and footer
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #3498db, #2c3e50);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+  
+    .profile-image {
+      display: block;
+      max-width: 180px;
+      height: auto;
+      margin: 0 auto 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  
+    .detail {
+      margin: 10px 0;
+      font-size: 1rem;
+      color: #34495e;
+  
+      strong {
+        color: #2c3e50;
+      }
+    }
+  }
+  
+  .employee-details-loading,
+  .employee-details-error {
+    text-align: center;
+    margin-top: 100px;
+    font-size: 1.1rem;
+    color: #2c3e50;
+  }
+  
+  .edit-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3498db, #2c3e50);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+    &:hover {
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      transform: translateY(-2px);
+    }
+  }
+  

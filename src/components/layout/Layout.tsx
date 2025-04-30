@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import '../../assets/styles/Layout.scss';
-import { Outlet, useNavigate } from 'react-router-dom';
-// import Navbar from '../common/Navbar';
-// import Footer from '../common/Footer';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { RoleProvider } from '../../utils/RoleContext';
-// import Cookies from 'js-cookie';
 
 const Layout = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Get the current location
   const [role, setRole] = useState<string | null>(null);
-  // const user_id = Cookies.get('user_id');
+
   useEffect(() => {
     const access_token = sessionStorage.getItem('access_token');
     const userRole = sessionStorage.getItem('role');
+
     if (!access_token) {
       navigate('/auth/login');
     } else {
       setRole(userRole);
-      if (userRole === 'admin') {
+
+      // Prevent redirection if already on a valid route
+      if (userRole === 'admin' && !location.pathname.startsWith('/admin')) {
         navigate('/admin');
-      } else if (userRole === 'employee') {
+      } else if (userRole === 'employee' && !location.pathname.startsWith('/employee')) {
         navigate('/employee');
       }
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]); // Add location.pathname as a dependency
 
   return (
     <>
-      {/* <Navbar /> */}
       <RoleProvider role={role}>
         <Outlet />
       </RoleProvider>
-      {/* <Footer /> */}
     </>
   );
 };

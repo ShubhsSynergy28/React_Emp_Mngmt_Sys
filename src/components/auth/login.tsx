@@ -18,6 +18,9 @@ interface ApiResponse {
     id: number;
     name: string;
   };
+  user?: {
+    username: string;
+  };
   message: string;
   access_token?: string;
   refresh_token?: string;
@@ -43,40 +46,49 @@ const Login: React.FC = () => {
   const handleLoginFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       let response;
       if ('email' in loginFormField) {
+        // Admin login
         response = await api.post<ApiResponse>('/login', {
           email: loginFormField.email,
-          password: loginFormField.password
-        },
-        { withCredentials: true });
+          password: loginFormField.password,
+        }, { withCredentials: true });
+
         if (response.data.access_token) {
           sessionStorage.setItem("access_token", response.data.access_token);
-          Cookies.set("access_token_cookie", response.data.access_token, { path: '/', expires: 7 })
-
+          Cookies.set("access_token_cookie", response.data.access_token, { path: '/', expires: 7 });
         }
-        if(response.data.refresh_token){
+        if (response.data.refresh_token) {
           sessionStorage.setItem("refresh_token", response.data.refresh_token);
           Cookies.set("refresh_token_cookie", response.data.refresh_token, { path: '/', expires: 7 });
         }
+        if (response.data.user?.username) {
+          sessionStorage.setItem("name", response.data.user.username); // Store name in session
+        }
         sessionStorage.setItem("role", "admin");
       } else {
+        // Employee login
         response = await api.post<ApiResponse>('/login-emp', {
           phone_no: loginFormField.phone_no,
-          password: loginFormField.password
-        },
-        { withCredentials: true });
+          password: loginFormField.password,
+        }, { withCredentials: true });
+
         if (response.data.access_token) {
           sessionStorage.setItem("access_token", response.data.access_token);
-          Cookies.set("access_token_cookie", response.data.access_token, { path: '/', expires: 7 }); // Set access_token as a cookie
+          Cookies.set("access_token_cookie", response.data.access_token, { path: '/', expires: 7 });
         }
-        
-        if(response.data.refresh_token){
+        if (response.data.refresh_token) {
           sessionStorage.setItem("refresh_token", response.data.refresh_token);
-          Cookies.set("refresh_token_cookie", response.data.refresh_token, { path: '/', expires: 7 }); // Set refresh_token as a cookie
-    
+          Cookies.set("refresh_token_cookie", response.data.refresh_token, { path: '/', expires: 7 });
+        }
+        if (response.data.employee?.id) {
+          sessionStorage.setItem("employee_id", response.data.employee.id.toString()); // Store employee ID
+          Cookies.set("employee_id_cookie", response.data.employee.id.toString(), { path: '/', expires: 7 }); // Optional: Store as cookie
+        }
+        if (response.data.employee?.name) {
+          sessionStorage.setItem("name", response.data.employee.name); // Store name in session
         }
         sessionStorage.setItem("role", "employee");
       }
@@ -85,13 +97,13 @@ const Login: React.FC = () => {
       setTimeout(() => {
         navigate('/');
       }, 1500);
-      
+
     } catch (err) {
       let errorMessage = 'Login failed. Please check your credentials.';
-      if (axios.isAxiosError(err) ){
+      if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.error || errorMessage;
       }
-      
+
       showSnackbar(errorMessage, 'error');
     } finally {
       setIsLoading(false);

@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import '../../assets/styles/common/Navbar.scss';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -10,31 +11,45 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       const role = sessionStorage.getItem('role');
-      const access_token = sessionStorage.getItem('access_token');
-      // const refresh_token = sessionStorage.getItem('refresh_token');
+      const accessToken = sessionStorage.getItem('access_token'); // Retrieve the access token
       let response;
 
-      if (role === 'admin') {
-        response = await axios.post('http://localhost:5000/logout', {}, {
-          withCredentials: true, // Include cookies in the request
-          headers: {
-            Authorization: `Bearer ${access_token}`, // Add the access token as a Bearer token
-          },
-        });
-        sessionStorage.clear();
-      } else {
-        response = await axios.post('http://localhost:5000/logout-emp', {}, {
-          withCredentials: true, // Include cookies in the request
-          headers: {
-            Authorization: `Bearer ${access_token}`, // Add the access token as a Bearer token
-          },
-        });
-        sessionStorage.clear();
+      if (!accessToken) {
+        console.error('Access token is missing.');
+        return;
       }
-      
+
+      if (role === 'admin') {
+        response = await axios.post(
+          'http://localhost:5000/logout',
+          {}, // No body needed
+          {
+            withCredentials: true, // Include cookies in the request
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Add the access token as a Bearer token
+            },
+          }
+        );
+      } else {
+        response = await axios.post(
+          'http://localhost:5000/logout-emp',
+          {}, // No body needed
+          {
+            withCredentials: true, // Include cookies in the request
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Add the access token as a Bearer token
+            },
+          }
+        );
+      }
+
       if (response.status === 200) {
-        sessionStorage.clear();
         // Clear session storage and redirect to login
+        sessionStorage.clear();
+        Cookies.remove('access_token_cookie', { path: '/' });
+        Cookies.remove('refresh_token_cookie', { path: '/' });
+        Cookies.remove('employee_id',{path: '/'});
+
         navigate('/auth/login');
       } else {
         console.error('Logout failed:', response.statusText);
@@ -52,7 +67,9 @@ const Navbar: React.FC = () => {
         transition={{ type: 'spring', stiffness: 60 }}
         className="navbar"
       >
+        <Link to={'/'}>
         <h1 className="navbar-title">Employee Management</h1>
+        </Link>
         <button className="logout-button" onClick={handleLogout}>
           Logout
         </button>
