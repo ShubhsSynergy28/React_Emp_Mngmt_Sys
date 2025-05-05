@@ -116,7 +116,7 @@ const Dashboard: React.FC = () => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get<Employee[]>('http://127.0.0.1:5000/employees');
+      const res = await axios.get<Employee[]>(import.meta.env.VITE_GET_ALL_EMPLOYEES);
       setEmployees(res.data);
       showSnackbar('Employees loaded successfully', 'success');
     } catch (err) {
@@ -177,7 +177,7 @@ const Dashboard: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://127.0.0.1:5000/delete-employee/${id}`);
+      await axios.delete(`${import.meta.env.VITE_DELETE_EMPLOYEE}/${id}`);
       setEmployees(prev => prev.filter(emp => emp.id !== id));
       showSnackbar('Employee deleted successfully', 'success');
     } catch (err) {

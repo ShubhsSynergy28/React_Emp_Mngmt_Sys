@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
 
       if (role === 'admin') {
         response = await axios.post(
-          'http://localhost:5000/logout',
+          import.meta.env.VITE_ADMIN_LOGOUT,
           {}, // No body needed
           {
             withCredentials: true, // Include cookies in the request
@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
         );
       } else {
         response = await axios.post(
-          'http://localhost:5000/logout-emp',
+          import.meta.env.VITE_EMPLOYEE_LOGOUT,
           {}, // No body needed
           {
             withCredentials: true, // Include cookies in the request

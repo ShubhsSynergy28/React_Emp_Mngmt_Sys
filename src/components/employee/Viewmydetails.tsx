@@ -29,7 +29,7 @@ const Viewmydetails: React.FC = () => {
       }
 
       try {
-        const response = await axios.get<Employee>(`http://127.0.0.1:5000/employee/${id}`);
+        const response = await axios.get<Employee>(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${id}`);
         setEmployee(response.data);
       } catch (err) {
         setError('Failed to fetch employee details. ' + err);

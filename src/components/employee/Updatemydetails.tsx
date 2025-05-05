@@ -44,9 +44,9 @@ const Updatemydetails: React.FC = () => {
 
       try {
         const [employeeRes, hobbiesRes, educationsRes] = await Promise.all([
-          axios.get(`http://127.0.0.1:5000/employee/${id}`),
-          axios.get(`http://127.0.0.1:5000/get-all-available-hobbies`),
-          axios.get(`http://127.0.0.1:5000/get-all-available-educations`),
+          axios.get(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${id}`),
+          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
+          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATIONS),
         ]);
 
         const {
@@ -161,7 +161,7 @@ const Updatemydetails: React.FC = () => {
       };
 
       await axios.put(
-        `http://127.0.0.1:5000/update-employee/${id}`,
+        `${import.meta.env.VITE_UPDATE_EMPLOYEE}/${id}`,
         submissionData,
         {
           headers: {

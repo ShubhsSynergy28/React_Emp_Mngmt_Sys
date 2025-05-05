@@ -36,8 +36,8 @@ const Createemployee: React.FC = () => {
     const fetchOptions = async () => {
       try {
         const [hobbiesRes, educationsRes] = await Promise.all([
-          axios.get('http://127.0.0.1:5000/get-all-available-hobbies'),
-          axios.get('http://127.0.0.1:5000/get-all-available-educations')
+          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
+          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATIONS)
         ]);
 
         setAvailableHobbies(hobbiesRes.data.map((hobby: any) => ({
@@ -94,7 +94,7 @@ const Createemployee: React.FC = () => {
         password: form.password
       };
 
-      await axios.post('http://127.0.0.1:5000/createEmployee', submissionData);
+      await axios.post(import.meta.env.VITE_POST_CREATE_EMPLOYEE, submissionData);
 
       showSnackbar('Employee created successfully!', 'success');
       setTimeout(() => navigate('/'), 1500);
