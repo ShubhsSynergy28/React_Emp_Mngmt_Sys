@@ -19,20 +19,24 @@ yarn create vite my-vite-app --template react-ts
 
 # pnpm
 pnpm create vite my-vite-app --template react-ts
+```
 2. Install Apollo Client
-bash
+```bash
 # npm
 npm install @apollo/client graphql
-
+```
+```bash
 # yarn
 yarn add @apollo/client graphql
-
+```
+```bash
 # pnpm
 pnpm add @apollo/client graphql
+```
 3. Set up Apollo Client
 In your main.tsx (or main.jsx):
-
 typescript
+```bash
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
@@ -51,11 +55,13 @@ createRoot(document.getElementById('root')!).render(
     </ApolloProvider>
   </StrictMode>,
 )
+```
 4. Using GraphQL Queries and Mutations
 Defining Queries and Mutations
 Create a file (e.g., src/graphql/operations.ts) to store your operations:
 
 typescript
+```bash
 import { gql } from '@apollo/client';
 
 export const GET_EMPLOYEE_BY_ID = gql`
@@ -89,8 +95,11 @@ export const DELETE_EMPLOYEE_MUTATION = gql`
     }
   }
 `;
+```
+
 Using in Components
 typescript
+```bash
 import { useQuery, useMutation } from '@apollo/client';
 import { 
   GET_EMPLOYEE_BY_ID, 
@@ -144,10 +153,12 @@ function EmployeeComponent() {
     </div>
   );
 }
+```
 5. Handling Loading and Error States
 Apollo Client provides loading, error, and data states that you can use to manage your UI:
 
 typescript
+```bash
 const { loading, error, data } = useQuery(GET_EMPLOYEE_BY_ID);
 
 if (loading) {
@@ -160,11 +171,13 @@ if (error) {
 
 // When successful, render the data
 return <EmployeeData data={data.getEmployeebyId} />;
+```
 6. Advanced Configuration
 Customizing Apollo Client
 You can extend the Apollo Client configuration:
 
 typescript
+```bash
 const client = new ApolloClient({
   uri: 'http://localhost:4000/graphql',
   cache: new InMemoryCache({
@@ -181,10 +194,12 @@ const client = new ApolloClient({
     },
   },
 });
+```
 Error Handling
 For global error handling:
 
 typescript
+```bash
 import { ApolloClient, InMemoryCache, ApolloProvider, from } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { createHttpLink } from '@apollo/client/link/http';
@@ -208,6 +223,7 @@ const client = new ApolloClient({
   link: from([errorLink, httpLink]),
   cache: new InMemoryCache(),
 });
+```
 7. Testing Queries in Apollo Studio
 Open your GraphQL server in Apollo Studio
 
@@ -225,6 +241,7 @@ GraphQL Syntax
 Vite + React + TypeScript Guide
 
 9. Example Component Structure
+```bash
 src/
 ├── components/
 │   ├── Employee/
@@ -238,13 +255,16 @@ src/
 │   └── useEmployees.ts
 ├── App.tsx
 └── main.tsx
-10. TypeScript Support
+```
+11. TypeScript Support
 For better TypeScript support, generate types from your GraphQL schema:
 
-bash
+```bash
 npm install -D @graphql-codegen/cli
 npx graphql-codegen init
+```
 Follow the prompts to set up code generation. This will create type definitions for your queries and mutations.
 
-
+```bash
 This updated README provides a comprehensive guide for setting up Apollo GraphQL with Vite and TypeScript, including query/mutation examples, error handling, and TypeScript integration
+```
