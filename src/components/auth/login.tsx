@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { motion } from 'framer-motion';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -7,24 +7,26 @@ import TextField from '@mui/material/TextField'; // Import TextField
 import { useNavigate } from 'react-router-dom';
 import '../../assets/styles/auth/Login.scss'; 
 import Cookies from 'js-cookie';
+import { useMutation} from '@apollo/client';
+import { LOGIN_EMPLOYEE, LOGIN_USER } from '../../constants/mutations';
 
 interface LoginFieldProps {
   [key: string]: string;
   password: string;
 }
 
-interface ApiResponse {
-  employee?: {
-    id: number;
-    name: string;
-  };
-  user?: {
-    username: string;
-  };
-  message: string;
-  access_token?: string;
-  refresh_token?: string;
-}
+// interface ApiResponse {
+//   employee?: {
+//     id: number;
+//     name: string;
+//   };
+//   user?: {
+//     username: string;
+//   };
+//   message: string;
+//   access_token?: string;
+//   refresh_token?: string;
+// }
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -37,78 +39,92 @@ const Login: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [loginEmployee] = useMutation(LOGIN_EMPLOYEE);
+  const [loginUser] = useMutation(LOGIN_USER);
 
-  const api = axios.create({
-    baseURL: 'http://127.0.0.1:5000',
-    withCredentials: true,  // Important for sessions to work
-  });
+
+  // const api = axios.create({
+  //   baseURL: 'http://127.0.0.1:5000',
+  //   withCredentials: true,  // Important for sessions to work
+  // });
 
   const handleLoginFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      let response;
-      if ('email' in loginFormField) {
-        // Admin login
-        response = await api.post<ApiResponse>('/login', {
-          email: loginFormField.email,
-          password: loginFormField.password,
-        }, { withCredentials: true });
+  try {
+    let responseData;
 
-        if (response.data.access_token) {
-          sessionStorage.setItem("access_token", response.data.access_token);
-          Cookies.set("access_token_cookie", response.data.access_token, { path: '/', expires: 7 });
-        }
-        if (response.data.refresh_token) {
-          sessionStorage.setItem("refresh_token", response.data.refresh_token);
-          Cookies.set("refresh_token_cookie", response.data.refresh_token, { path: '/', expires: 7 });
-        }
-        if (response.data.user?.username) {
-          sessionStorage.setItem("name", response.data.user.username); // Store name in session
-        }
-        sessionStorage.setItem("role", "admin");
-      } else {
-        // Employee login
-        response = await api.post<ApiResponse>('/login-emp', {
-          phone_no: loginFormField.phone_no,
-          password: loginFormField.password,
-        }, { withCredentials: true });
+    if ('email' in loginFormField) {
+      // Admin login using GraphQL
+      const { data } = await loginUser({
+        variables: {
+          uSerLoginData: {
+            email: loginFormField.email,
+            password: loginFormField.password,
+          },
+        },
+      });
 
-        if (response.data.access_token) {
-          sessionStorage.setItem("access_token", response.data.access_token);
-          Cookies.set("access_token_cookie", response.data.access_token, { path: '/', expires: 7 });
-        }
-        if (response.data.refresh_token) {
-          sessionStorage.setItem("refresh_token", response.data.refresh_token);
-          Cookies.set("refresh_token_cookie", response.data.refresh_token, { path: '/', expires: 7 });
-        }
-        if (response.data.employee?.id) {
-          sessionStorage.setItem("employee_id", response.data.employee.id.toString()); // Store employee ID
-          Cookies.set("employee_id_cookie", response.data.employee.id.toString(), { path: '/', expires: 7 }); // Optional: Store as cookie
-        }
-        if (response.data.employee?.name) {
-          sessionStorage.setItem("name", response.data.employee.name); // Store name in session
-        }
-        sessionStorage.setItem("role", "employee");
+      const userLogin = data?.userLogin;
+      responseData = userLogin;
+
+      if (userLogin.access_token) {
+        sessionStorage.setItem('access_token', userLogin.access_token);
+        Cookies.set('access_token_cookie', userLogin.access_token, { path: '/', expires: 7 });
       }
-
-      showSnackbar(response.data.message, 'success');
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
-
-    } catch (err) {
-      let errorMessage = 'Login failed. Please check your credentials.';
-      if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.error || errorMessage;
+      if (userLogin.refresh_token) {
+        sessionStorage.setItem('refresh_token', userLogin.refresh_token);
+        Cookies.set('refresh_token_cookie', userLogin.refresh_token, { path: '/', expires: 7 });
       }
+      if (userLogin.user?.username) {
+        sessionStorage.setItem('name', userLogin.user.username);
+      }
+      sessionStorage.setItem('role', 'admin');
+    } else {
+      // Employee login using GraphQL
+      const { data } = await loginEmployee({
+        variables: {
+          employeeLoginData: {
+            phone_no: loginFormField.phone_no,
+            password: loginFormField.password,
+          },
+        },
+      });
 
-      showSnackbar(errorMessage, 'error');
-    } finally {
-      setIsLoading(false);
+      const empLogin = data?.employeeLogin;
+      responseData = empLogin;
+
+      if (empLogin.access_token) {
+        sessionStorage.setItem('access_token', empLogin.access_token);
+        Cookies.set('access_token_cookie', empLogin.access_token, { path: '/', expires: 7 });
+      }
+      if (empLogin.refresh_token) {
+        sessionStorage.setItem('refresh_token', empLogin.refresh_token);
+        Cookies.set('refresh_token_cookie', empLogin.refresh_token, { path: '/', expires: 7 });
+      }
+      if (empLogin.employee?.id) {
+        sessionStorage.setItem('employee_id', empLogin.employee.id.toString());
+        Cookies.set('employee_id_cookie', empLogin.employee.id.toString(), { path: '/', expires: 7 });
+      }
+      if (empLogin.employee?.name) {
+        sessionStorage.setItem('name', empLogin.employee.name);
+      }
+      sessionStorage.setItem('role', 'employee');
     }
-  };
+
+    showSnackbar(responseData.message, 'success');
+    setTimeout(() => navigate('/'), 1500);
+
+  } catch (err: any) {
+    // console.error('Login error:', err);
+    const errorMessage = err?.message || 'Login failed. Please check your credentials.';
+    showSnackbar(errorMessage, 'error');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbarMessage(message);

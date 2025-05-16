@@ -4,6 +4,9 @@ import Select from "react-select";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Snackbar, Alert } from "@mui/material";
 import "../../assets/styles/admin/Updateemployeedetails.scss";
+import { useMutation } from "@apollo/client";
+import { UPDATE_EMPLOYEE } from "../../constants/mutations";
+// import { GET_EMPLOYEE_BY_ID } from "../../constants/query";
 
 interface OptionType {
   value: string;
@@ -25,6 +28,7 @@ const Updateemployeedetails: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const employeeId = new URLSearchParams(location.search).get("id");
+  const [updateEmployee] = useMutation(UPDATE_EMPLOYEE);
 
   const [form, setForm] = useState({
     name: "",
@@ -57,7 +61,7 @@ const Updateemployeedetails: React.FC = () => {
         const [employeeRes, hobbiesRes, educationsRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${employeeId}`),
           axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATIONS),
+          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION),
         ]);
 
         const employeeData: EmployeeData = employeeRes.data;
@@ -95,7 +99,7 @@ const Updateemployeedetails: React.FC = () => {
           hobbies: selectedHobbies,
         });
       } catch (err) {
-        console.error("Fetch error:", err);
+        // console.error("Fetch error:", err);
         setSnackbarSeverity("error");
         setSnackbarMessage("Failed to fetch employee data");
         setSnackbarOpen(true);
@@ -127,45 +131,45 @@ const Updateemployeedetails: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!employeeId) return;
+  e.preventDefault();
+  
+  if (!employeeId) return;
 
-    try {
-      const submissionData = {
-        name: form.name,
-        phone_no: form.phone_no,
-        birth_date: form.birth_date,
-        gender: form.gender,
-        description: form.description,
-        education: form.education.map(edu => edu.value),
-        hobbies: form.hobbies.map(hobby => hobby.value),
-      };
+  try {
+    // Convert arrays to comma-separated strings
+    const submissionData = {
+      name: form.name,
+      phone_no: form.phone_no,
+      birth_date: form.birth_date,
+      gender: form.gender,
+      description: form.description,
+      education: form.education.map(edu => edu.value).join(','), // Convert to string
+      hobbies: form.hobbies.map(hobby => hobby.value).join(',')  // Convert to string
+    };
 
-      await axios.put(
-        `${import.meta.env.VITE_UPDATE_EMPLOYEE}/${employeeId}`,
-        submissionData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    // GraphQL mutation call
+    const { data } = await updateEmployee({
+      variables: {
+        input: submissionData,
+        updateEmployeeId: employeeId
+      }
+    });
 
+    if (data.updateEmployee.message) {
       setSnackbarSeverity("success");
-      setSnackbarMessage("Employee details updated successfully");
+      setSnackbarMessage(data.updateEmployee.message);
       setSnackbarOpen(true);
       setTimeout(() => {
         navigate("/");
       }, 1500);
-    } catch (err) {
-      console.error("Update error:", err);
-      setSnackbarSeverity("error");
-      setSnackbarMessage("Failed to update employee details");
-      setSnackbarOpen(true);
     }
-  };
-
+  } catch (err) {
+    // console.error("Update error:", err);
+    setSnackbarSeverity("error");
+    setSnackbarMessage("Failed to update employee details");
+    setSnackbarOpen(true);
+  }
+};
   if (loading) {
     return <div className="loading-container">Loading employee data...</div>;
   }

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client';
+import { DELETE_EMPLOYEE_MUTATION } from '../../constants/mutations';
+import { GET_ALL_EMPLOYEES_QUERY } from '../../constants/query';
 import { 
   FiEye, 
   FiEdit2, 
@@ -29,10 +31,10 @@ interface SnackbarProps {
   type: 'success' | 'error' | 'info';
   show: boolean;
   onClose: () => void;
-  
 }
 
-const Snackbar: React.FC<SnackbarProps> = ({ message, type, show, onClose}) => {
+
+const Snackbar: React.FC<SnackbarProps> = ({ message, type, show, onClose }) => {
   useEffect(() => {
     if (show) {
       const timer = setTimeout(() => {
@@ -90,12 +92,17 @@ const ConfirmationDialog: React.FC<{
 };
 
 const Dashboard: React.FC = () => {
+  const { loading: loadingEmps, error: errorInFetchEmp, data: allEmpData } = useQuery(
+    GET_ALL_EMPLOYEES_QUERY,
+    {pollInterval: 1000,}
+  );
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteEmployeeMutation] = useMutation(DELETE_EMPLOYEE_MUTATION);
   const [snackbar, setSnackbar] = useState<Omit<SnackbarProps, 'onClose'>>({ 
     message: '', 
     type: 'info', 
@@ -111,21 +118,35 @@ const Dashboard: React.FC = () => {
   const adminName = sessionStorage.getItem('name') || 'Admin';
 
   useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const fetchEmployees = async () => {
-    try {
-      const res = await axios.get<Employee[]>(import.meta.env.VITE_GET_ALL_EMPLOYEES);
-      setEmployees(res.data);
+    if (allEmpData?.getAllEmployees) {
+      const transformedEmployees = allEmpData.getAllEmployees.map((emp: any) => ({
+        id: emp.Eid,
+        name: emp.EName,
+        phone_no: emp.Ephone,
+        birth_date: emp.Ebirth_date,
+        gender: emp.Egender,
+        description: emp.Edescription,
+        education: emp.educations || [],
+        hobbies: emp.hobbies || []
+      }));
+      
+      setEmployees(transformedEmployees);
       showSnackbar('Employees loaded successfully', 'success');
-    } catch (err) {
-      setError('Failed to fetch employees.' + err);
-      showSnackbar('Failed to load employees', 'error');
-    } finally {
       setLoading(false);
     }
-  };
+  }, [allEmpData]);
+
+  useEffect(() => {
+    if (errorInFetchEmp) {
+      setError('Failed to fetch employees: ' + errorInFetchEmp.message);
+      showSnackbar('Failed to load employees', 'error');
+      setLoading(false);
+    }
+  }, [errorInFetchEmp]);
+
+  useEffect(() => {
+    setLoading(loadingEmps);
+  }, [loadingEmps]);
 
   const showSnackbar = (message: string, type: 'success' | 'error' | 'info') => {
     setSnackbar({ message, type, show: true });
@@ -176,16 +197,31 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`${import.meta.env.VITE_DELETE_EMPLOYEE}/${id}`);
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
-      showSnackbar('Employee deleted successfully', 'success');
-    } catch (err) {
-      showSnackbar('Failed to delete employee', 'error');
-    } finally {
-      hideDeleteDialog();
-    }
-  };
+  try {
+    await deleteEmployeeMutation({
+      variables: { deleteEmployeeId: id.toString() },  // convert to string if needed
+      update: (cache) => {
+        cache.modify({
+          fields: {
+            getAllEmployees(existingEmployeesRefs = [], { readField }) {
+              return existingEmployeesRefs.filter(
+                (empRef: any) => id.toString() !== readField('Eid', empRef)
+              );
+            }
+          }
+        });
+      }
+    });
+
+    setEmployees(prev => prev.filter(emp => emp.id !== id));
+    showSnackbar('Employee deleted successfully', 'success');
+  } catch (err: any) {
+    showSnackbar(`Failed to delete employee: ${err.message}`, 'error');
+  } finally {
+    hideDeleteDialog();
+  }
+};
+
 
   const handleEdit = (id: number) => {
     navigate(`/admin/update-employee?id=${id}`);

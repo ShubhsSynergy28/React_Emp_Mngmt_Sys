@@ -3,6 +3,8 @@ import axios from 'axios';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
+import { useMutation } from '@apollo/client';
+import { ADD_EMPLOYEE_MUTATION } from '../../constants/mutations';
 import '../../assets/styles/admin/Createemployee.scss';
 
 interface OptionType {
@@ -25,19 +27,19 @@ const Createemployee: React.FC = () => {
 
   const [availableHobbies, setAvailableHobbies] = useState<OptionType[]>([]);
   const [availableEducations, setAvailableEducations] = useState<OptionType[]>([]);
-  const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Fetch available options when component mounts
+  const [addEmployee, { loading: mutationLoading, error: mutationError }] = useMutation(ADD_EMPLOYEE_MUTATION);
+
   React.useEffect(() => {
     const fetchOptions = async () => {
       try {
         const [hobbiesRes, educationsRes] = await Promise.all([
           axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATIONS)
+          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION)
         ]);
 
         setAvailableHobbies(hobbiesRes.data.map((hobby: any) => ({
@@ -50,7 +52,7 @@ const Createemployee: React.FC = () => {
           label: edu.name
         })));
       } catch (err) {
-        console.error('Error fetching options:', err);
+        // console.error('Error fetching options:', err);
         showSnackbar('Failed to load options', 'error');
       }
     };
@@ -77,34 +79,32 @@ const Createemployee: React.FC = () => {
     setForm(prev => ({ ...prev, education: selected || [] }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    try {
-      // Convert arrays to comma-separated strings
-      const submissionData = {
-        name: form.name,
-        phone_no: form.phone_no,
-        birth_date: form.birth_date,
-        gender: form.gender,
-        description: form.description,
-        hobbies: form.hobbies.map(h => h.value).join(','),
-        education: form.education.map(e => e.value).join(','),
-        password: form.password
-      };
+  try {
+    // Convert arrays to comma-separated strings
+    const input = {
+      name: form.name,
+      phone_no: form.phone_no,
+      birth_date: form.birth_date,
+      gender: form.gender,
+      description: form.description,
+      education: form.education.map(e => e.value).join(','), // as string
+      hobbies: form.hobbies.map(h => h.value).join(','),     // as string
+      password: form.password,
+    };
 
-      await axios.post(import.meta.env.VITE_POST_CREATE_EMPLOYEE, submissionData);
+    const { data } = await addEmployee({ variables: { input } });
 
+    if (data?.addEmployee?.message) {
       showSnackbar('Employee created successfully!', 'success');
       setTimeout(() => navigate('/'), 1500);
-    } catch (err) {
-      console.error('Error creating employee:', err);
-      showSnackbar('Failed to create employee', 'error');
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err: any) {
+    showSnackbar(err.message || 'Failed to create employee', 'error');
+  }
+};
 
   return (
     <div className="create-employee-container">
@@ -249,8 +249,12 @@ const Createemployee: React.FC = () => {
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Employee'}
+          <button 
+            type="submit" 
+            className="submit-button" 
+            disabled={mutationLoading}
+          >
+            {mutationLoading ? 'Creating...' : 'Create Employee'}
           </button>
           <button 
             type="button" 

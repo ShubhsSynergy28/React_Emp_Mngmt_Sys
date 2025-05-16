@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Select from "react-select";
-import "../../assets/styles/employee/Updatemydetails.scss";
-import { Snackbar, Alert } from "@mui/material";
-import { nav } from "framer-motion/client";
 import { useNavigate } from "react-router-dom";
+import { Snackbar, Alert } from "@mui/material";
+import { useQuery, useMutation } from "@apollo/client";
+import "../../assets/styles/employee/Updatemydetails.scss";
+import { GET_EMPLOYEE_BY_ID } from "../../constants/query"; // Update path
+import { UPDATE_EMPLOYEE } from "../../constants/mutations";
 
 interface OptionType {
   value: string;
@@ -23,41 +25,34 @@ const Updatemydetails: React.FC = () => {
   });
 
   const [availableHobbies, setAvailableHobbies] = useState<OptionType[]>([]);
-  const [availableEducations, setAvailableEducations] = useState<OptionType[]>(
-    []
-  );
+  const [availableEducations, setAvailableEducations] = useState<OptionType[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const navigate = useNavigate();
+  const employeeId = sessionStorage.getItem("employee_id");
+  const [updateEmployee] = useMutation(UPDATE_EMPLOYEE);
+
+  // GraphQL query for employee data
+  const { loading: employeeLoading, data: employeeData } = useQuery(GET_EMPLOYEE_BY_ID, {
+    variables: { getEmployeebyIdId: employeeId },
+    skip: !employeeId,
+    pollInterval: 1000,
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      const id = sessionStorage.getItem("employee_id");
-      if (!id) {
-        setError("No employee ID found.");
-        return;
-      }
+    if (!employeeId) {
+      setError("No employee ID found in session.");
+      return;
+    }
 
+    const fetchStaticData = async () => {
       try {
-        const [employeeRes, hobbiesRes, educationsRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${id}`),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATIONS),
-        ]);
-
-        const {
-          name,
-          phone_no,
-          birth_date,
-          gender,
-          description,
-          education,
-          hobbies,
-        } = employeeRes.data;
+        // Keep axios for hobbies and educations (as requested)
+        const hobbiesRes = await axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES)
+        const educationsRes = await axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION)  
+        
 
         // Transform API data to match react-select's expected format
         const educationOptions: OptionType[] = educationsRes.data.map(
@@ -77,37 +72,39 @@ const Updatemydetails: React.FC = () => {
         setAvailableEducations(educationOptions);
         setAvailableHobbies(hobbyOptions);
 
-        // Find the selected education and hobbies based on names
-        const getNamesArray = (arr: any[]) =>
-          arr.map((item) => (typeof item === "string" ? item : item.name));
-
-        const educationNames = getNamesArray(education);
-        const hobbiesNames = getNamesArray(hobbies);
-
-        const selectedEducations = educationOptions.filter((edu) =>
-          educationNames.includes(edu.value)
-        );
-
-        const selectedHobbies = hobbyOptions.filter((hobby) =>
-          hobbiesNames.includes(hobby.value)
-        );
-
-        setForm({
-          name,
-          phone_no,
-          birth_date,
-          gender,
-          description,
-          education: selectedEducations,
-          hobbies: selectedHobbies,
-        });
       } catch (err) {
-        setError("Failed to fetch data." + err);
+        setError("Failed to fetch static data." + err);
       }
     };
 
-    fetchData();
+    fetchStaticData();
   }, []);
+
+  // When employee data loads from GraphQL
+  useEffect(() => {
+    if (employeeData?.getEmployeebyId && availableEducations.length && availableHobbies.length) {
+      const employee = employeeData.getEmployeebyId;
+      
+      // Find the selected education and hobbies based on names
+      const selectedEducations = availableEducations.filter(edu => 
+        employee.educations.includes(edu.value)
+      );
+
+      const selectedHobbies = availableHobbies.filter(hobby => 
+        employee.hobbies.includes(hobby.value)
+      );
+
+      setForm({
+        name: employee.EName,
+        phone_no: employee.Ephone,
+        birth_date: employee.Ebirth_date,
+        gender: employee.Egender,
+        description: employee.Edescription,
+        education: selectedEducations,
+        hobbies: selectedHobbies,
+      });
+    }
+  }, [employeeData, availableEducations, availableHobbies]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -146,45 +143,43 @@ const Updatemydetails: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    const id = sessionStorage.getItem("employee_id");
-    if (!id) return;
+  if (!employeeId) return;
 
-    try {
-      const submissionData = {
-        name: form.name,
-        phone_no: form.phone_no,
-        birth_date: form.birth_date,
-        gender: form.gender,
-        description: form.description,
-        education: form.education.map((edu) => edu.label),
-        hobbies: form.hobbies.map((hobby) => hobby.label),
-      };
+  try {
+    const submissionData = {
+      name: form.name,
+      phone_no: form.phone_no,
+      birth_date: form.birth_date,
+      gender: form.gender,
+      description: form.description,
+      education: form.education.map((edu) => edu.value).join(","), // <-- comma-separated
+      hobbies: form.hobbies.map((hobby) => hobby.value).join(","), // <-- comma-separated
+    };
 
-      await axios.put(
-        `${import.meta.env.VITE_UPDATE_EMPLOYEE}/${id}`,
-        submissionData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    const { data } = await updateEmployee({
+      variables: {
+        input: submissionData,
+        updateEmployeeId: employeeId
+      }
+    });
 
-      setSnackbarSeverity("success");
-      setSnackbarMessage("Details updated successfully.");
-      setSnackbarOpen(true);
-      setTimeout(() => {
-        navigate("/"); // Redirect to employee dashboard
-      },1500)
-    } catch (err) {
-      console.error("Update error:", err);
-      setSnackbarSeverity("error");
-      setSnackbarMessage("Failed to update details.");
-      setSnackbarOpen(true);
-    }
-  };
+    setSnackbarSeverity("success");
+    setSnackbarMessage(data?.updateEmployee?.message || "Details updated successfully.");
+    setSnackbarOpen(true);
+    setTimeout(() => {
+      navigate("/");
+    }, 1500);
+  } catch (err) {
+    // console.error("Update error:", err);
+    setSnackbarSeverity("error");
+    setSnackbarMessage("Failed to update details.");
+    setSnackbarOpen(true);
+  }
+};
+
 
   if (error) return <div className="update-error">{error}</div>;
+  if (employeeLoading || !form.name) return <div className="update-loading">Loading...</div>;
 
   return (
     <>

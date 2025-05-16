@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import '../../assets/styles/admin/ViewEmployeeDetails.scss'
+import { useQuery } from '@apollo/client';
+import '../../assets/styles/admin/ViewEmployeeDetails.scss';
+import { GET_EMPLOYEE_BY_ID } from '../../constants/query';
 
 interface Employee {
   id: number;
@@ -14,11 +15,18 @@ interface Employee {
   hobbies: string[];
 }
 
+
 const ViewEmployeeDetails: React.FC = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const { loading, error: queryError, data } = useQuery(GET_EMPLOYEE_BY_ID, {
+    variables: { getEmployeebyIdId: id },
+    skip: !id,
+    pollInterval: 1000
+  });
 
   useEffect(() => {
     if (!id) {
@@ -26,23 +34,31 @@ const ViewEmployeeDetails: React.FC = () => {
       return;
     }
 
-    const fetchEmployee = async () => {
-      try {
-        const res = await axios.get<Employee>(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${id}`);
-        setEmployee(res.data);
-      } catch (err) {
-        setError('Failed to fetch employee details.' + err);
-      }
-    };
+    if (queryError) {
+      setError(`Failed to fetch employee details: ${queryError.message}`);
+      return;
+    }
 
-    fetchEmployee();
-  }, [id]);
+    if (data?.getEmployeebyId) {
+      const empData = data.getEmployeebyId;
+      setEmployee({
+        id: empData.Eid,
+        name: empData.EName,
+        phone_no: empData.Ephone,
+        birth_date: empData.Ebirth_date,
+        gender: empData.Egender,
+        description: empData.Edescription,
+        education: empData.educations || [],
+        hobbies: empData.hobbies || []
+      });
+    }
+  }, [id, data, queryError]);
 
   if (error) {
     return <div className="view-error">{error}</div>;
   }
 
-  if (!employee) {
+  if (loading || !employee) {
     return <div className="view-loading">Loading...</div>;
   }
 
