@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 
 export const RoleContext = createContext<string | null>(null);
 
-export const useRole = () => useContext(RoleContext);
+export const useRole = () => {return useContext(RoleContext)};
 
 interface RoleProviderProps {
   children: React.ReactNode;

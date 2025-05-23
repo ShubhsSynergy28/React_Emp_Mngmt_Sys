@@ -38,19 +38,21 @@ const Createemployee: React.FC = () => {
     const fetchOptions = async () => {
       try {
         const [hobbiesRes, educationsRes] = await Promise.all([
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION)
+          // axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
+          axios.get('http://127.0.0.1:5000/get-all-available-hobbies'),
+          // axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION)
+          axios.get('http://127.0.0.1:5000/get-all-available-educations')
         ]);
 
-        setAvailableHobbies(hobbiesRes.data.map((hobby: any) => ({
+        setAvailableHobbies(hobbiesRes.data.map((hobby: any) => {return {
           value: hobby.name,
           label: hobby.name
-        })));
+        }}));
 
-        setAvailableEducations(educationsRes.data.map((edu: any) => ({
+        setAvailableEducations(educationsRes.data.map((edu: any) => {return {
           value: edu.name,
           label: edu.name
-        })));
+        }}));
       } catch (err) {
         // console.error('Error fetching options:', err);
         showSnackbar('Failed to load options', 'error');
@@ -68,15 +70,15 @@ const Createemployee: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm(prev => {return { ...prev, [name]: value }});
   };
 
   const handleHobbiesChange = (selected: OptionType[] | null) => {
-    setForm(prev => ({ ...prev, hobbies: selected || [] }));
+    setForm(prev => {return { ...prev, hobbies: selected || [] }});
   };
 
   const handleEducationChange = (selected: OptionType[] | null) => {
-    setForm(prev => ({ ...prev, education: selected || [] }));
+    setForm(prev => {return { ...prev, education: selected || [] }});
   };
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -90,8 +92,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       birth_date: form.birth_date,
       gender: form.gender,
       description: form.description,
-      education: form.education.map(e => e.value).join(','), // as string
-      hobbies: form.hobbies.map(h => h.value).join(','),     // as string
+      education: form.education.map(e => {return e.value}).join(','), // as string
+      hobbies: form.hobbies.map(h => {return h.value}).join(','),     // as string
       password: form.password,
     };
 
@@ -99,7 +101,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if (data?.addEmployee?.message) {
       showSnackbar('Employee created successfully!', 'success');
-      setTimeout(() => navigate('/'), 1500);
+      setTimeout(() => {return navigate('/')}, 1500);
     }
   } catch (err: any) {
     showSnackbar(err.message || 'Failed to create employee', 'error');
@@ -110,12 +112,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     <div className="create-employee-container">
       <div className="create-employee-header">
         <h2>Create New Employee</h2>
-        <button onClick={() => navigate('/')} className="back-button">
+        <button onClick={() => {return navigate('/')}} className="back-button">
           Back to Dashboard
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="create-employee-form">
+      <form aria-label="Create Employee Form" onSubmit={handleSubmit} className="create-employee-form">
         <div className="form-grid">
           <div className="form-group">
             <label>Full Name *</label>
@@ -142,8 +144,9 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
 
           <div className="form-group">
-            <label>Birth Date *</label>
+            <label htmlFor='birth_date'>Birth Date *</label>
             <input
+              id='birth_date'
               type="date"
               name="birth_date"
               value={form.birth_date}
@@ -183,7 +186,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <button 
                 type="button" 
                 className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => {return setShowPassword(!showPassword)}}
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -214,14 +217,15 @@ const handleSubmit = async (e: React.FormEvent) => {
               placeholder="Select education"
               className="multi-select"
               classNamePrefix="select"
+              data-testid="education-select"
               required
               menuPortalTarget={document.body}
               styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                control: (provided) => ({
+                menuPortal: (base) => {return { ...base, zIndex: 9999 }},
+                control: (provided) => {return {
                   ...provided,
                   minHeight: '44px',
-                }),
+                }},
               }}
             />
           </div>
@@ -236,13 +240,14 @@ const handleSubmit = async (e: React.FormEvent) => {
               placeholder="Select hobbies"
               className="multi-select"
               classNamePrefix="select"
+              data-testid="hobbies-select"
               menuPortalTarget={document.body}
               styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                control: (provided) => ({
+                menuPortal: (base) => {return { ...base, zIndex: 9999 }},
+                control: (provided) => {return {
                   ...provided,
                   minHeight: '44px',
-                }),
+                }},
               }}
             />
           </div>
@@ -258,7 +263,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </button>
           <button 
             type="button" 
-            onClick={() => navigate('/')}
+            onClick={() => {return navigate('/')}}
             className="cancel-button"
           >
             Cancel
@@ -269,11 +274,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={() => {return setSnackbarOpen(false)}}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
+          onClose={() => {return setSnackbarOpen(false)}}
           severity={snackbarSeverity}
           sx={{ width: '100%' }}
         >

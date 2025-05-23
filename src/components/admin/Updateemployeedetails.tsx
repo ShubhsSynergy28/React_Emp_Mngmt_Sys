@@ -59,34 +59,37 @@ const Updateemployeedetails: React.FC = () => {
     const fetchData = async () => {
       try {
         const [employeeRes, hobbiesRes, educationsRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${employeeId}`),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
-          axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION),
+          // axios.get(`${import.meta.env.VITE_GET_EMPLOYEE_BY_ID}/${employeeId}`),
+          axios.get(`http://127.0.0.1:5000/employee/${employeeId}`),
+          // axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES),
+          axios.get('http://127.0.0.1:5000/get-all-available-hobbies'),
+          // axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION),
+          axios.get('http://127.0.0.1:5000/get-all-available-educations'),
         ]);
 
         const employeeData: EmployeeData = employeeRes.data;
         
         // Transform API data to match react-select's expected format
-        const educationOptions: OptionType[] = educationsRes.data.map((edu: any) => ({
+        const educationOptions: OptionType[] = educationsRes.data.map((edu: any) => {return {
           value: edu.name,
           label: edu.name,
-        }));
+        }});
 
-        const hobbyOptions: OptionType[] = hobbiesRes.data.map((hobby: any) => ({
+        const hobbyOptions: OptionType[] = hobbiesRes.data.map((hobby: any) => {return {
           value: hobby.name,
           label: hobby.name,
-        }));
+        }});
 
         setAvailableEducations(educationOptions);
         setAvailableHobbies(hobbyOptions);
 
         // Find the selected education and hobbies based on names
         const selectedEducations = educationOptions.filter(edu => 
-          employeeData.education.includes(edu.value)
+          {return employeeData.education.includes(edu.value)}
         );
 
         const selectedHobbies = hobbyOptions.filter(hobby => 
-          employeeData.hobbies.includes(hobby.value)
+          {return employeeData.hobbies.includes(hobby.value)}
         );
 
         setForm({
@@ -112,22 +115,22 @@ const Updateemployeedetails: React.FC = () => {
     fetchData();
   }, [employeeId, navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm(prev => {return { ...prev, [e.target.name]: e.target.value }});
   };
 
   const handleHobbiesChange = (selected: OptionType[] | null) => {
-    setForm(prev => ({
+    setForm(prev => {return {
       ...prev,
       hobbies: selected || [],
-    }));
+    }});
   };
 
   const handleEducationChange = (selected: OptionType[] | null) => {
-    setForm(prev => ({
+    setForm(prev => {return {
       ...prev,
       education: selected || [],
-    }));
+    }});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,8 +146,8 @@ const Updateemployeedetails: React.FC = () => {
       birth_date: form.birth_date,
       gender: form.gender,
       description: form.description,
-      education: form.education.map(edu => edu.value).join(','), // Convert to string
-      hobbies: form.hobbies.map(hobby => hobby.value).join(',')  // Convert to string
+      education: form.education.map(edu => {return edu.value}).join(','), // Convert to string
+      hobbies: form.hobbies.map(hobby => {return hobby.value}).join(',')  // Convert to string
     };
 
     // GraphQL mutation call
@@ -179,7 +182,7 @@ const Updateemployeedetails: React.FC = () => {
       <div className="admin-update-header">
         <h2>Update Employee Details</h2>
         <button 
-          onClick={() => navigate("/")} 
+          onClick={() => {return navigate("/")}} 
           className="back-button"
         >
           Back to Dashboard
@@ -223,7 +226,7 @@ const Updateemployeedetails: React.FC = () => {
           <select
             name="gender"
             value={form.gender}
-            onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement>)}
+            onChange={handleChange}
             required
           >
             <option value="">Select Gender</option>
@@ -255,11 +258,11 @@ const Updateemployeedetails: React.FC = () => {
             classNamePrefix="select"
             menuPortalTarget={document.body}
             styles={{
-              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-              control: (provided) => ({
+              menuPortal: (base) => {return { ...base, zIndex: 9999 }},
+              control: (provided) => {return {
                 ...provided,
                 minHeight: '44px',
-              }),
+              }},
             }}
           />
         </div>
@@ -276,11 +279,11 @@ const Updateemployeedetails: React.FC = () => {
             classNamePrefix="select"
             menuPortalTarget={document.body}
             styles={{
-              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-              control: (provided) => ({
+              menuPortal: (base) => {return { ...base, zIndex: 9999 }},
+              control: (provided) => {return {
                 ...provided,
                 minHeight: '44px',
-              }),
+              }},
             }}
           />
         </div>
@@ -291,7 +294,7 @@ const Updateemployeedetails: React.FC = () => {
           </button>
           <button 
             type="button" 
-            onClick={() => navigate("/")}
+            onClick={() => {return navigate("/")}}
             className="cancel-button"
           >
             Cancel
@@ -302,11 +305,11 @@ const Updateemployeedetails: React.FC = () => {
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={() => {return setSnackbarOpen(false)}}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
+          onClose={() => {return setSnackbarOpen(false)}}
           severity={snackbarSeverity}
           sx={{ width: "100%" }}
         >

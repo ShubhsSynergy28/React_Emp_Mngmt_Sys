@@ -50,23 +50,26 @@ const Updatemydetails: React.FC = () => {
     const fetchStaticData = async () => {
       try {
         // Keep axios for hobbies and educations (as requested)
-        const hobbiesRes = await axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES)
-        const educationsRes = await axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION)  
+        // const hobbiesRes = await axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_HOBBIES)
+        const hobbiesRes = await axios.get('http://127.0.0.1:5000/get-all-available-hobbies')
+        // const educationsRes = await axios.get(import.meta.env.VITE_GET_ALL_AVAILABLE_EDUCATION)  
+        const educationsRes = await axios.get('http://127.0.0.1:5000/get-all-available-educations')  
+
         
 
         // Transform API data to match react-select's expected format
         const educationOptions: OptionType[] = educationsRes.data.map(
-          (edu: any) => ({
+          (edu: any) => {return {
             value: edu.name,
             label: edu.name,
-          })
+          }}
         );
 
         const hobbyOptions: OptionType[] = hobbiesRes.data.map(
-          (hobby: any) => ({
+          (hobby: any) => {return {
             value: hobby.name,
             label: hobby.name,
-          })
+          }}
         );
 
         setAvailableEducations(educationOptions);
@@ -87,11 +90,11 @@ const Updatemydetails: React.FC = () => {
       
       // Find the selected education and hobbies based on names
       const selectedEducations = availableEducations.filter(edu => 
-        employee.educations.includes(edu.value)
+        {return employee.educations.includes(edu.value)}
       );
 
       const selectedHobbies = availableHobbies.filter(hobby => 
-        employee.hobbies.includes(hobby.value)
+        {return employee.hobbies.includes(hobby.value)}
       );
 
       setForm({
@@ -109,14 +112,14 @@ const Updatemydetails: React.FC = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => {return { ...prev, [e.target.name]: e.target.value }});
   };
 
   const handleHobbiesChange = (selected: OptionType[] | null) => {
-    setForm((prev) => ({
+    setForm((prev) => {return {
       ...prev,
       hobbies: selected || [],
-    }));
+    }});
   };
 
   const handleEducationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +128,7 @@ const Updatemydetails: React.FC = () => {
     setForm((prev) => {
       if (checked) {
         const selectedEdu = availableEducations.find(
-          (edu) => edu.value === value
+          (edu) => {return edu.value === value}
         );
         return {
           ...prev,
@@ -136,7 +139,7 @@ const Updatemydetails: React.FC = () => {
       } else {
         return {
           ...prev,
-          education: prev.education.filter((edu) => edu.value !== value),
+          education: prev.education.filter((edu) => {return edu.value !== value}),
         };
       }
     });
@@ -152,8 +155,8 @@ const Updatemydetails: React.FC = () => {
       birth_date: form.birth_date,
       gender: form.gender,
       description: form.description,
-      education: form.education.map((edu) => edu.value).join(","), // <-- comma-separated
-      hobbies: form.hobbies.map((hobby) => hobby.value).join(","), // <-- comma-separated
+      education: form.education.map((edu) => {return edu.value}).join(","), // <-- comma-separated
+      hobbies: form.hobbies.map((hobby) => {return hobby.value}).join(","), // <-- comma-separated
     };
 
     const { data } = await updateEmployee({
@@ -218,17 +221,17 @@ const Updatemydetails: React.FC = () => {
 
         <div className="education-checkbox-group">
           <h4>Education</h4>
-          {availableEducations.map((edu) => (
+          {availableEducations.map((edu) => {return (
             <label key={edu.value} className="checkbox-label">
               <input
                 type="checkbox"
                 value={edu.value}
-                checked={form.education.some((e) => e.value === edu.value)}
+                checked={form.education.some((e) => {return e.value === edu.value})}
                 onChange={handleEducationChange}
               />
               {edu.label}
             </label>
-          ))}
+          )})}
         </div>
 
         <div className="hobbies-select-container">
@@ -243,22 +246,22 @@ const Updatemydetails: React.FC = () => {
             classNamePrefix="select"
             menuPortalTarget={document.body}
             styles={{
-              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-              menu: (provided) => ({ ...provided, zIndex: 9999 }),
-              control: (provided) => ({
+              menuPortal: (base) => {return { ...base, zIndex: 9999 }},
+              menu: (provided) => {return { ...provided, zIndex: 9999 }},
+              control: (provided) => {return {
                 ...provided,
                 maxHeight: "150px",
                 overflow: "auto",
-              }),
-              multiValue: (provided) => ({
+              }},
+              multiValue: (provided) => {return {
                 ...provided,
                 backgroundColor: "#3498db",
                 color: "white",
-              }),
-              multiValueLabel: (provided) => ({
+              }},
+              multiValueLabel: (provided) => {return {
                 ...provided,
                 color: "white",
-              }),
+              }},
             }}
           />
         </div>
@@ -268,11 +271,11 @@ const Updatemydetails: React.FC = () => {
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={() => {return setSnackbarOpen(false)}}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
+          onClose={() => {return setSnackbarOpen(false)}}
           severity={snackbarSeverity}
           sx={{ width: "100%" }}
         >

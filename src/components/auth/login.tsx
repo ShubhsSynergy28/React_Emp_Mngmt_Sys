@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import axios from 'axios';
 import { motion } from 'framer-motion';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -114,7 +113,7 @@ const Login: React.FC = () => {
     }
 
     showSnackbar(responseData.message, 'success');
-    setTimeout(() => navigate('/'), 1500);
+    setTimeout(() => {return navigate('/')}, 1500);
 
   } catch (err: any) {
     // console.error('Login error:', err);
@@ -149,10 +148,10 @@ const Login: React.FC = () => {
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginFormField(prev => ({
+    setLoginFormField(prev => {return {
       ...prev,
       password: e.target.value,
-    }));
+    }});
   };
 
   const currentFieldName = loginFormField.phone_no !== undefined ? 'phone_no' : 'email';

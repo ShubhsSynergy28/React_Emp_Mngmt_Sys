@@ -1,28 +1,49 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import js from "@eslint/js";
+import globals from "globals";
+import tseslint from "typescript-eslint";
+import pluginReact from "eslint-plugin-react";
+import { defineConfig } from "eslint/config";
 
-export default tseslint.config(
-  { ignores: ['dist'] },
-  {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-    },
+export default defineConfig([
+  { 
+    files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"], 
+    plugins: { js }, 
+    extends: ["js/recommended"] 
   },
-)
+  { 
+    files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"], 
+    languageOptions: { 
+      globals: {
+        ...globals.browser,
+        ...globals.es2020
+      } 
+    } 
+  },
+  tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
+  {
+    settings: {  // Moved react settings to proper settings object
+      react: {
+        version: 'detect'
+      }
+    }
+  },
+  {
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      "arrow-body-style": ["error", "always"],
+      "no-irregular-whitespace": 'warn',
+      "no-unreachable": "error",
+      "no-duplicate-imports": ["error", { "includeExports": true }],
+      // Recommended additional rules for React/TypeScript:
+      "react/jsx-uses-react": "error",
+      "react/jsx-uses-vars": "error",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+      'react/no-unescaped-entities': ['error', {
+        forbid: ['>', '}'] // Only check for these potentially problematic chars
+      }]
+    }
+  }
+]);

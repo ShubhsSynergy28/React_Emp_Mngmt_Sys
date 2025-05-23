@@ -60,7 +60,7 @@ const Viewmydetails: React.FC = () => {
       <div className="detail"><strong>Education:</strong> {employee.educations.join(', ')}</div>
       <div className="detail"><strong>Hobbies:</strong> {employee.hobbies.join(', ')}</div>
 
-      <button className="edit-button" onClick={() => navigate('/employee/update-my-details')}>
+      <button className="edit-button" onClick={() => {return navigate('/employee/update-my-details')}}>
         Edit My Details
       </button>
     </div>

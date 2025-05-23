@@ -40,7 +40,7 @@ const Snackbar: React.FC<SnackbarProps> = ({ message, type, show, onClose }) => 
       const timer = setTimeout(() => {
         onClose();
       }, 3000);
-      return () => clearTimeout(timer);
+      return () => {return clearTimeout(timer)};
     }
   }, [show, onClose]);
 
@@ -119,7 +119,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (allEmpData?.getAllEmployees) {
-      const transformedEmployees = allEmpData.getAllEmployees.map((emp: any) => ({
+      const transformedEmployees = allEmpData.getAllEmployees.map((emp: any) => {return {
         id: emp.Eid,
         name: emp.EName,
         phone_no: emp.Ephone,
@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
         description: emp.Edescription,
         education: emp.educations || [],
         hobbies: emp.hobbies || []
-      }));
+      }});
       
       setEmployees(transformedEmployees);
       showSnackbar('Employees loaded successfully', 'success');
@@ -153,7 +153,7 @@ const Dashboard: React.FC = () => {
   };
 
   const hideSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, show: false }));
+    setSnackbar(prev => {return { ...prev, show: false }});
   };
 
   const showDeleteDialog = (id: number, name: string) => {
@@ -174,11 +174,11 @@ const Dashboard: React.FC = () => {
 
   // Filter employees based on search term
   const filteredEmployees = employees.filter(emp =>
-    emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    {return emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.phone_no.includes(searchTerm) ||
     emp.gender.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.education.some(edu => edu.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    emp.hobbies.some(hobby => hobby.toLowerCase().includes(searchTerm.toLowerCase()))
+    emp.education.some(edu => {return edu.toLowerCase().includes(searchTerm.toLowerCase())}) ||
+    emp.hobbies.some(hobby => {return hobby.toLowerCase().includes(searchTerm.toLowerCase())})}
   );
 
   // Pagination logic
@@ -188,7 +188,7 @@ const Dashboard: React.FC = () => {
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
 
   // Change page
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber: number) => {return setCurrentPage(pageNumber)};
 
   // Handle page size change
   const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
           fields: {
             getAllEmployees(existingEmployeesRefs = [], { readField }) {
               return existingEmployeesRefs.filter(
-                (empRef: any) => id.toString() !== readField('Eid', empRef)
+                (empRef: any) => {return id.toString() !== readField('Eid', empRef)}
               );
             }
           }
@@ -213,7 +213,7 @@ const Dashboard: React.FC = () => {
       }
     });
 
-    setEmployees(prev => prev.filter(emp => emp.id !== id));
+    setEmployees(prev => {return prev.filter(emp => {return emp.id !== id})});
     showSnackbar('Employee deleted successfully', 'success');
   } catch (err: any) {
     showSnackbar(`Failed to delete employee: ${err.message}`, 'error');
@@ -256,7 +256,7 @@ const Dashboard: React.FC = () => {
       <ConfirmationDialog
         show={deleteDialog.show}
         message={`Are you sure you want to delete "${deleteDialog.employeeName}"? This action cannot be undone.`}
-        onConfirm={() => handleDelete(deleteDialog.employeeId)}
+        onConfirm={() => {return handleDelete(deleteDialog.employeeId)}}
         onCancel={hideDeleteDialog}
       />
 
@@ -319,7 +319,7 @@ const Dashboard: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  currentItems.map(emp => (
+                  currentItems.map(emp => {return (
                     <tr key={emp.id}>
                       <td data-label="Name">{emp.name}</td>
                       <td data-label="Phone No">{emp.phone_no}</td>
@@ -336,21 +336,21 @@ const Dashboard: React.FC = () => {
                         <div className="action-buttons">
                           <button
                             className="view-btn"
-                            onClick={() => handleView(emp.id)}
+                            onClick={() => {return handleView(emp.id)}}
                             title="View"
                           >
                             <FiEye className="icon" />
                           </button>
                           <button
                             className="edit-btn"
-                            onClick={() => handleEdit(emp.id)}
+                            onClick={() => {return handleEdit(emp.id)}}
                             title="Edit"
                           >
                             <FiEdit2 className="icon" />
                           </button>
                           <button
                             className="delete-btn"
-                            onClick={() => showDeleteDialog(emp.id, emp.name)}
+                            onClick={() => {return showDeleteDialog(emp.id, emp.name)}}
                             title="Delete"
                           >
                             <FiTrash2 className="icon" />
@@ -358,7 +358,7 @@ const Dashboard: React.FC = () => {
                         </div>
                       </td>
                     </tr>
-                  ))
+                  )})
                 )}
               </tbody>
             </table>
@@ -371,15 +371,15 @@ const Dashboard: React.FC = () => {
                     value={itemsPerPage}
                     onChange={handleItemsPerPageChange}
                   >
-                    {[5, 10, 15, 20, 25, 30].map(size => (
+                    {[5, 10, 15, 20, 25, 30].map(size => {return (
                       <option key={size} value={size}>{size}</option>
-                    ))}
+                    )})}
                   </select>
                 </div>
 
                 <div className="page-slider">
                   <button
-                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    onClick={() => {return paginate(Math.max(1, currentPage - 1))}}
                     disabled={currentPage === 1}
                     className="page-nav"
                   >
@@ -388,32 +388,32 @@ const Dashboard: React.FC = () => {
 
                   {startPage > 1 && (
                     <>
-                      <button onClick={() => paginate(1)} className="page-number">1</button>
+                      <button onClick={() => {return paginate(1)}} className="page-number">1</button>
                       {startPage > 2 && <span className="ellipsis">...</span>}
                     </>
                   )}
 
-                  {Array.from({ length: endPage - startPage + 1 }, (_, i) => (
+                  {Array.from({ length: endPage - startPage + 1 }, (_, i) => {return (
                     <button
                       key={startPage + i}
-                      onClick={() => paginate(startPage + i)}
+                      onClick={() => {return paginate(startPage + i)}}
                       className={`page-number ${currentPage === startPage + i ? 'active' : ''}`}
                     >
                       {startPage + i}
                     </button>
-                  ))}
+                  )})}
 
                   {endPage < totalPages && (
                     <>
                       {endPage < totalPages - 1 && <span className="ellipsis">...</span>}
-                      <button onClick={() => paginate(totalPages)} className="page-number">
+                      <button onClick={() => {return paginate(totalPages)}} className="page-number">
                         {totalPages}
                       </button>
                     </>
                   )}
 
                   <button
-                    onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                    onClick={() => {return paginate(Math.min(totalPages, currentPage + 1))}}
                     disabled={currentPage === totalPages}
                     className="page-nav"
                   >
